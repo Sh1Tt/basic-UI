@@ -1,0 +1,6 @@
+function hsd_restart {
+	systemctl stop hsd
+	sleep 12s
+	systemctl start hsd
+}
+hsd_restart
