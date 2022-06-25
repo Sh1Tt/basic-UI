@@ -912,20 +912,20 @@ const html = `
 			};
 			
 			function ipReport() {
-				const a = document.body.querySelector("#report-url");
+				// const a = document.body.querySelector("#report-url");
 				
-				cache.raw = window.localStorage.getItem(storeID.cacheReport) || null;
+				// cache.raw = window.localStorage.getItem(storeID.cacheReport) || null;
 				
-				if (cache.raw) cache.report = JSON.parse(cache.raw);
+				// if (cache.raw) cache.report = JSON.parse(cache.raw);
 
-				if (cache.report) {
-					if ( Date.now() < cache.report.ts + 60 * 60 * 24 * 1000 ) {
-						a.href = cache.report.url;
-						return;
-					};
-				};
+				// if (cache.report) {
+				// 	if ( Date.now() < cache.report.ts + 60 * 60 * 24 * 1000 ) {
+				// 		a.href = cache.report.url;
+				// 		return;
+				// 	};
+				// };
 
-				getInboundReport(connection.pk);
+				getInboundReport();
 
 			};
 
@@ -984,7 +984,7 @@ const html = `
 			};
 
 			function getInboundReport() {
-				fetch("/info/peers/inbound",{
+				fetch("/generate-inbound-report",{
 					method: "GET",
 					headers: {
 						"Content-Type" : "application/json",
@@ -993,8 +993,7 @@ const html = `
 				})
 				.then(res => res.json())
 				.then(data => {
-					window.localStorage.setItem(storeID.cacheReport, JSON.stringify({ts: Date.now(), url: data.url}));
-					ipReport(connection.pk);
+					document.body.querySelector("#report-url").href = data.url;
 				})
 				.catch(err => {
 					console.log(err);

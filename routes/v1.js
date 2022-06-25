@@ -137,11 +137,11 @@ module.exports = function v1Routes(fastify, options, done)
 			});
 	});
 	
-	fastify.get( "/generate/rand-32", async (req, reply) =>
+	fastify.get( "/generate/rand-53", async (req, reply) =>
 	{
 		// await new Promise(resolve => {
 			const conf = {
-				l: 32,
+				l: 53,
 				charset: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123567890"
 			};
 			let _key = "";
@@ -158,20 +158,22 @@ module.exports = function v1Routes(fastify, options, done)
 
 	fastify.get( "/generate-inbound-report", async (req, reply) =>
 	{
-		const c = spawn(`bash`, [ `/var/www/runtime/hsd-inbound-report` ]);
-		let stream = {};
-		c.stdout.on('data', (data) => {
-			const decoded = data.toString("utf-8");
-			reply.type("application/json");
-			reply.send({url:decoded});
-		});
-		c.stderr.on('data', (data) => {
-			const decoded = data.toString("utf-8");
-			stream.err = decoded;
-		});
-		c.on('close', (code) => {
-			stream.close = {spawn: `child process exited with code ${code}`};
-			reply.send(stream);
+		await new Promise(resolve => {
+			const c = spawn(`bash`, [ `/var/www/hsd-inbound-report` ]);
+			let stream = {};
+			c.stdout.on('data', (data) => {
+				const decoded = data.toString("utf-8");
+				stream.url = decoded;
+			});
+			c.stderr.on('data', (data) => {
+				const decoded = data.toString("utf-8");
+				stream.err = decoded;
+			});
+			c.on('close', (code) => {
+				stream.close = {spawn: `child process exited with code ${code}`};
+				resolve(stream);
+				return reply.send(stream);
+			});
 		});
 	});
 	
@@ -192,6 +194,40 @@ module.exports = function v1Routes(fastify, options, done)
 			std.close = { spawn: `child process exited with code ${code}`};
 			console.log(std.close);
 			reply.send(std);
+		});
+
+	});
+
+	fastify.get( "/dev/dig/:domain/:type", async (req, reply) =>
+	{	
+		const { domain, type } = req.params;
+		const c = spawn(`dig`, [...[ `@127.0.0.1`, '-p', 5350 ], domain, type || '' ] );
+		let res;
+		c.stdout.on('data', (data) => {
+			const decoded = data.toString("utf-8");
+			const startLine = ';; ANSWER SECTION:';
+			const endLine = ';; SIG0';
+			const dropHead = decoded.substr(decoded.indexOf(startLine) + startLine.length + 1);
+			const dropFoot = dropHead.substr(0, dropHead.indexOf(endLine) - 1);
+			const raw = dropFoot.split(domain);
+			const records = raw.filter(line => line !== '')
+			.map(line => {
+				const s = line.indexOf('"');
+				return line.substr(s).replace(/\\t/g," ").replace(/[\\"]/g,"").replace(/[\n]/g,"");
+			});
+			res = JSON.stringify(records);
+		});
+
+		c.stderr.on('data', (data) => {
+			const error = data.toString("utf-8");
+			res = { error };
+		});
+
+		c.on('close', (code) => {
+			reply.send(res.error ? { 
+				res, 
+				exit: `child process exited with code ${code}`
+			} : res);
 		});
 
 	});
