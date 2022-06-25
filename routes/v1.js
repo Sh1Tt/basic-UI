@@ -115,18 +115,38 @@ module.exports = function v1Routes(fastify, options, done)
 	});
 
 
-	fastify.get( "/api-key", async (req, reply) =>
+	fastify.get( "/generate/api-key", async (req, reply) =>
 	{
 		// await new Promise(resolve => {
 			const conf = {
 				l: 32,
-				d: 3,
+				d: 4,
 				charset: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123567890"
 			};
 			let _key = "";
 			for (var i = conf.l - 1; i >= 0; i--) {
 				const r = Math.floor(Math.random() * conf.charset.length) + 0;
-				if(i===7||i===15||i===23) _key += "-";
+				if (i===7||i===15||i===23) _key += "-";
+				_key += conf.charset.slice(r,r+1);
+			};
+			reply.send({
+				length: conf.l,
+				dec: conf.d,
+				dev: conf.l / conf.d,
+				key: _key
+			});
+	});
+	
+	fastify.get( "/generate/rand-32", async (req, reply) =>
+	{
+		// await new Promise(resolve => {
+			const conf = {
+				l: 32,
+				charset: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123567890"
+			};
+			let _key = "";
+			for (var i = conf.l - 1; i >= 0; i--) {
+				const r = Math.floor(Math.random() * conf.charset.length) + 0;
 				_key += conf.charset.slice(r,r+1);
 			};
 			reply.send({
