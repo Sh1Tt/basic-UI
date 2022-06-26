@@ -69,8 +69,8 @@ const html = `
 			    width: 32vh;
 			    aspect-ratio: 1;
 			    border-radius: 50%;
-			    border: 0.01rem solid rgba(23,23,23,.25);
-			    outline: 0.01rem solid rgba(255,255,255,.75);
+			    /*border: 0.01rem solid rgba(23,23,23,.25);
+			    outline: 0.01rem solid rgba(255,255,255,.75);*/
 			    transform-style: preserve-3d;
 			    backdrop-filter: blur(3px);
 			    transition: .4s ease-in-out;
@@ -86,6 +86,7 @@ const html = `
 			    aspect-ratio: 1;
 			    border-radius: 50%;
 			    background: conic-gradient(rgba(248,248,255,.5),rgba(248,248,255,.5),rgba(32,32,36,.75),rgba(32,32,36,.75),rgba(32,32,36,.75),rgba(32,32,36,.75),rgba(32,32,36,.75),rgba(248,248,255,.5));
+			    filter: drop-shadow(1px 3px 10px rgba(23,23,27,.5));
 			}
 			nav#hsd-menu::after {
 				position: absolute;
@@ -96,6 +97,7 @@ const html = `
 			    aspect-ratio: 1;
 			    border-radius: 50%;
 			    background: radial-gradient( rgba(255,255,255,.75), rgba(255,255,255,.33), rgba(255,255,255,.125));
+			    filter: drop-shadow(1px 3px 10px rgba(23,23,27,.5));
 			}
 			nav#hsd-menu .bg {
 				position: absolute;
@@ -106,6 +108,7 @@ const html = `
 		        background: linear-gradient(75deg, rgba(2,4,8,.55), rgba(12,86,108,.55), rgba(12,86,108,.55), rgba(248,246,255,.55));
 			    z-index: 1234567890234567890098765434567898765432345698;
 			    opacity: 1;
+			    filter: drop-shadow(1px 3px 10px rgba(23,23,27,.5));
 			}
 			nav#hsd-menu #center {
 				position: absolute;
@@ -127,6 +130,7 @@ const html = `
 		        background: conic-gradient(rgba(248,246,255,.55), rgba(2,4,8,.55), rgba(12,86,108,.55), rgba(12,86,108,.55), rgba(248,246,255,.55));
 			    z-index: 1234567890234567890098765434567898765432345697;
 			    opacity: 1;
+			    filter: drop-shadow(1px 3px 10px rgba(23,23,27,.5));
 			}
 			nav#hsd-menu #center::after {
 				position: absolute;
@@ -135,7 +139,7 @@ const html = `
 			    width: 107.5%;
 			    aspect-ratio: 1;
 			    border-radius: 50%;
-		        background: conic-gradient(rgba(12,86,108,.75) 0.01%, rgba(0,0,0,0) 99.99%);
+		        background: radial-gradient(rgba(12,86,108,.75) 0.01%, rgba(0,0,0,0) 99.99%);
 			    z-index: 1;
 			    opacity: .7;
 			    animation-name: center-loading;
@@ -144,6 +148,29 @@ const html = `
 			    animation-timing-function: linear;
 			    animation-iteration-count: 1;
 			    animation-delay: .07s;
+			}
+			nav#hsd-menu .hsdCenterKnob {
+				position: absolute;
+			    inset: 30%;
+			    width: 40%;
+			    aspect-ratio: 1;
+			    border-radius: 50%;
+			    background: linear-gradient(66deg, rgba(2,4,8,1), rgba(2,4,8,.8), rgba(2,4,8,.6), rgba(12,86,108,.375), rgba(12,86,108,.25), rgba(248,246,255,.125));
+			    z-index: 1234567890234567890098765434567898765432345698;
+			    opacity: 1;
+			    filter: drop-shadow(1px 3px 10px rgba(23,23,27,.5));
+			}
+			nav#hsd-menu .hsdCenterKnob::before {
+				position: absolute;
+				content: '';
+				inset: 0;
+			    width: 100%;
+			    aspect-ratio: 1;
+			    border-radius: 50%;
+		        background: conic-gradient(rgba(248,246,255,.55), rgba(2,4,8,.55), rgba(12,86,108,.55), rgba(12,86,108,.55), rgba(248,246,255,.55));
+		        background: rgba(182,182,196,.25);
+			    z-index: 1234567890234567890098765434567898765432345697;
+			    opacity: 1;
 			}
 			@KEYFRAMES center-loading {
 				0% {
@@ -640,60 +667,19 @@ const html = `
 					<span id="center"></span>
 					<div class="option" id="top-right">
 						<img src="https://img.icons8.com/external-line-lima-studio/64/ffffff/external-money-digital-asset-line-lima-studio.png"/>
-						<!--<img src="https://img.icons8.com/pastel-glyph/64/ffffff/cryptocurrency-wallet--v2.png"/>-->
-						<div class="sub-menu">
-							<div class="sub level-1">
-								<svg viewBox="0 0 100 100" id="sub1">
-									<path id="curve" d="M 0 46 A 50 50 0 0 1 54 100" />
-									<text width="500">
-										<textPath xlink:href="#curve">
-											Connect 🔗
-										</textPath>
-									</text>
-								</svg>
-							</div>
-							<div class="sub level-2">
-								<svg viewBox="0 0 100 100" id="sub1">
-									<path id="curve" d="M 50 50 A 50 50 0 0 1 100 100" />
-									<text width="500">
-										<textPath xlink:href="#curve">
-											Create 👾
-										</textPath>
-									</text>
-								</svg>
-							</div>
-						</div>
 					</div>
 					<div class="option" id="bottom-right">
 						<img src="https://img.icons8.com/external-kiranshastry-lineal-kiranshastry/64/ffffff/external-settings-coding-kiranshastry-lineal-kiranshastry.png"/>
-						<!--<img src="https://img.icons8.com/material-outlined/96/000000/gear--v1.png"/>-->
-						<div class="sub-menu">
-							<div class="sub level-1">
-								<span>Opt. 1</span>
-								<span>Opt. 2</span>
-							</div>
-						</div>
 					</div>
 					<div class="option" id="top-left">
 						<img src="https://img.icons8.com/external-icongeek26-outline-icongeek26/64/ffffff/external-interface-uxui-icongeek26-outline-icongeek26.png"/>
-						<!--<img src="https://img.icons8.com/external-flaticons-lineal-flat-icons/64/ffffff/external-interface-computer-programming-flaticons-lineal-flat-icons.png"/>-->
-						<!--<img src="https://img.icons8.com/ios/50/ffffff/bottom-navigation-toolbar.png"/>-->
-						<div class="sub-menu">
-							<div class="sub level-1">
-								<span>Manage</span>
-								<span>Option</span>
-							</div>
-						</div>
 					</div>
 					<div class="option" id="bottom-left">
 						<img src="https://img.icons8.com/wired/64/ffffff/minecraft-grass-cube.png"/>
-						<div class="sub-menu">
-							<div class="sub level-1">
-								<span>Opt. 1</span>
-								<span>Opt. 2</span>
-							</div>
-						</div>
 					</div>
+					<span id="center2" class="hsdCenterKnob">
+
+					</span>
 				</nav>
 				<!-- sync gears <img src="https://img.icons8.com/ios/100/ffffff/sync-settings.png"/> -->
 				<div id="bg"></div>
@@ -966,10 +952,12 @@ const html = `
 			};
 
 			function handleInfo(hsd) {
+				const Cap = v => v.charAt(0).toUpperCase()+v.slice(1);
+				const name = Cap(location.href.slice(8, location.href.indexOf(".")));
+				document.querySelector('title').innerText = name+" v"+hsd.version;
 				if (hsd.chain.height > connection.blockHeight) {
 					// block got mined..
 				}
-				document.querySelector('title').innerText = hsd.version;
 				document.body.querySelector('[data-hsd="version"]').innerHTML = '<h1>HSD '+hsd.version+'</h1><h2>uptime '+parseInt(hsd.time.uptime / (60*60*24))+'days</h2>';//'hsd/'+hsd.version+'<span data-hsd="uptime"> uptime: '+parseInt(hsd.time.uptime / (60*60*24))+'days</span>';
 				document.body.querySelector('[data-hsd="height"]').innerHTML = hsd.chain.height;
 				const isSynced = hsd.chain.progress >= 1;
@@ -1089,6 +1077,8 @@ const html = `
 					const sound = new Audio("https://mauricestolk.nl/api/ui-sci-fi-sound.wav");
 					sound.play();
 				}, false);
+
+
 				connection.log = {};
 				connection.peers = {};
 				connection.peers.connected = [];
