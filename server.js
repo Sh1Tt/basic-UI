@@ -1183,7 +1183,7 @@ fastify.get('/', (req, reply) => {
 });
 
 fastify.addHook('onRequest', async (req, reply) => {
-	if (req.url!=="/favicon.ico") {
+	if (req.url!=="/favicon.ico"&&req.url!=="/") {
 		const key = req.headers['x-api-key'] || req.query['x-api-key']
 		if ( key !== apiKey ) reply.status( 400 ).send({
 			statusCode: 400,

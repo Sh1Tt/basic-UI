@@ -232,5 +232,19 @@ module.exports = function v1Routes(fastify, options, done)
 
 	});
 	
+	const docs = `<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Document</title></head>
+<body><table><thead><th>TYPE</th><th>ENDPOINT</th></thead><tbody><tr><td>GET</td><td>/info</td></tr><tr><td>GET</td><td>/info/peers</td></tr><tr><td>GET</td><td>/info/peers/subver</td></tr><tr><td>GET</td><td>/info/peers/inbound</td></tr><tr><td>GET</td><td>/update/bundled</td></tr><tr><td>GET</td><td>/update/bundled</td></tr><tr><td>GET</td><td>/generate/api-key</td></tr><tr><td>GET</td><td>/generate/rand-53</td></tr><tr><td>GET</td><td>/generate-inbound-report</td></tr><tr><td>GET</td><td>/restart-service</td></tr><tr><td>GET</td><td>/dev/dig/:domain/:type</td></tr></tbody></table></body></html>`;
+	
+	fastify.get( "/docs", async (req, reply) =>
+	{	
+		reply.type('text/html');
+
+		reply.send(docs);
+
+	});
+
+
+	
 	done();
 };
