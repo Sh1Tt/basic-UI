@@ -23,6 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/cors": "^7.0.0",
+    "bsock": "^0.1.9",
     "child": "^0.0.3",
     "dotenv": "^16.0.1",
     "fastify": "^4.1.0",
@@ -33,10 +34,11 @@
     "hdns": "^0.8.0",
     "hs-client": "^0.0.11",
     "hsd": "^3.0.1",
+    "level": "^8.0.0",
     "mnemonic-words": "^1.1.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "nodemon": "^1.3.3"
+    "nodemon": "^2.0.18"
   }
 }

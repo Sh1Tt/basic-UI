@@ -847,12 +847,14 @@ const html = `
 				target.appendChild(startingheight);
 				target.appendChild(ping);
 				target.appendChild(whitelisted);
-				// peerGeo(peer,data => {
-				// 	const geotag = document.createElement("div");
-				// 	geotag.classList = "peer geo-location";
-				// 	geotag.innerHTML = data.city+", "+data.country_code;
-				// 	target.appendChild(geotag);
-				// });
+				const printGeo = data => {
+					console.log(data);
+					const geotag = document.createElement("div");
+					geotag.classList = "peer geo-location";
+					geotag.innerHTML = data.city+", "+data.country_code;
+					target.appendChild(geotag);
+				};
+				// peerGeo(peer,printGeo);
 			};
 
 			function addTxHash(hash,index) {
@@ -1098,9 +1100,6 @@ const html = `
 
 				function update() {
 					getBundledUpdate();
-					// getInfo();
-					// getPeerinfo();
-					// getMempoolTx();
 				}
 
 				if (k) {

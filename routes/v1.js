@@ -1,18 +1,26 @@
 'use strict';
 
-const {spawn} = require('node:child_process');
+const { spawn } = require('node:child_process');
 
-const {NodeClient} = require("hs-client");
+const { NodeClient, WalletClient } = require("hs-client");
 
-const {Network} = require("hsd");
+const { Network } = require("hsd");
 
 const network = Network.get("main");
+
+const { Level } = require("level");
 
 const devEscape = m => m.replace(/[\n \"]/g,"").replace(/["[]/g,"[").replace(/[\]"]/g,"]");
 
 const nodeClient = new NodeClient({
 	port: network.rpcPort,
 	apiKey: process.env.HSD_API_KEY
+});
+
+const walletClient = new WalletClient({
+	network: network.type,
+	port: network.walletPort,
+	apiKey: process.env.HSW_API_KEY
 });
 
 module.exports = function v1Routes(fastify, options, done)
@@ -231,6 +239,360 @@ module.exports = function v1Routes(fastify, options, done)
 		});
 
 	});
+
+	// API DOCS	
+	const docs = `<!DOCTYPE html>
+		<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Api doc</title>
+			</head>
+			<body>
+				<table>
+					<thead>
+						<th>TYPE</th>
+						<th>ENDPOINT</th>
+					</thead>
+					<tbody>
+						<tr>
+							<td>GET</td>
+							<td>/info</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/info/peers</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/info/peers/subver</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/info/peers/inbound</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/mempool/tx/hashes</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/update/bundled</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/generate/api-key</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/generate/rand-53</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/generate-inbound-report</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/restart-service</td>
+						</tr>
+						<tr>
+							<td>GET</td>
+							<td>/dev/dig/:domain/:type</td>
+						</tr>
+					</tbody>
+				</table>
+			</body>
+	</html>`;
 	
+	fastify.get( "/docs", async (req, reply) =>
+	{	
+		reply.type('text/html');
+		reply.send(docs);
+	});
+
+	
+	// HSW
+	fastify.get( "/index/:walletid", async (req, reply) =>
+	{	
+		try {
+			let addressIndex = new Level("./addr_index");
+			let txIndex = new Level("tx_index");
+
+			if (txIndex.status!=="open") {
+				await txIndex.open();
+			};
+			if (addressIndex.status!=="open") {
+				await addressIndex.open();
+			};
+			
+			const wallet = walletClient.wallet(req.params.walletid);
+
+			return reply.send({
+				addressIndex: addressIndex.status,
+				txIndex: txIndex.status,
+				wallet: walletClient
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		};
+	});
+
+	fastify.get( "/wallet/list", async (req, reply) =>
+	{	
+		try {
+			const details = await walletClient.getWallets();
+
+			return reply.send({
+				details: details
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		};
+	});
+
+	fastify.get( "/wallet/:id", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const details = await wallet.getInfo();
+
+			return reply.send({
+				details: details
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		};
+	});
+
+	fastify.get( "/wallet/:id/master-hd", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const master = await wallet.getMaster();
+			
+			return reply.send({
+				master: master
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+	});
+
+	fastify.post( "/wallet/:id/passphrase/:newphrase", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const passphrase = await wallet.setPassphrase(req.params.newphrase);
+			
+			return reply.send({
+				passphrase: passphrase
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+	});
+
+	fastify.get( "/wallet/:id/account/list", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const list = await wallet.getAccounts();
+			
+			return reply.send({
+				accounts: list
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+
+	});
+
+	fastify.get( "/wallet/:id/account/:account", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const account = await wallet.getAccount(req.params.account);
+			
+			return reply.send({
+				account: account
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+	});
+
+	fastify.get( "/wallet/:id/account/:account/history", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const history = await wallet.getHistory(req.params.account);
+			
+			return reply.send({
+				history: history
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+	});
+
+	fastify.get( "/wallet/:id/account/:account/receive", async (req, reply) =>
+	{	
+		try {
+			const wallet = walletClient.wallet(req.params.id);
+
+			const receiveAddress = await wallet.createAddress(req.params.account);
+			
+			return reply.send({
+				receiveAddress: receiveAddress
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+	});
+
+	fastify.get( "/wallet/:id/account/:account/history/test", async (req, reply) =>
+	{	
+		try {
+			let txIndex = new Level("tx_index");
+			
+			const wallet = walletClient.wallet(req.params.id);
+
+			const history = await wallet.getHistory(req.params.account);
+			
+			const transactions = [], 
+			shadow = [];
+
+			history.forEach(async tx => {
+				shadow.push(tx);
+				try {
+					const hash = tx.hash.toUpperCase();
+					let _cursor;
+					if (txIndex.status !== "open") {
+						await txIndex.open();
+					};
+					if (txIndex.status !== "open") {
+						_cursor = await txIndex.get(hash);
+						transactions.push(await _cursor);
+					};
+				}
+				catch(err) {
+					tx.outputs.forEach(async output => {
+						transactions.push(output);
+					});
+
+					// details.outputs.forEach(async (output) => {
+					// 	let address = output.address;
+					// 	let amount = output.value;
+					// 	let hash = details.hash.toUpperCase();
+					// 	let junoAddress;
+						
+					// 	try {
+					// 		junoAddress = await addressIndex.get(address);
+					// 	}
+					// 	catch(err) {
+					// 		await txIndex.put(
+					// 			hash.toUpperCase(),
+					// 			`No assigned address`
+					// 		);
+					// 		return null;
+					// 	}
+				
+					// 	if (junoAddress) {
+					// 		console.log(`${junoAddress} (${address}) received ${amount} dollarydoos`);
+					// 		try {
+					// 			let tx = await junoClient.execute(
+					// 				junoWallet.address,
+					// 				chnsContract,
+					// 				{
+					// 					transfer: {
+					// 						recipient: junoAddress.toString(),
+					// 						amount: amount.toString(),
+					// 					},
+					// 				},
+					// 				fee,
+					// 				`HNS deposit. HNS Tx ID: ${hash}. Powered by Another.Software`
+					// 			);
+
+					// 			await txIndex.put(
+					// 				hash.toUpperCase(),
+					// 				`juno:${tx.transactionHash}`
+					// 			);
+					// 		} 
+					// 		catch(err) {
+					// 			console.error(err);
+					// 			await txIndex.put(hash.toUpperCase(), `ERROR`);
+					// 			return null;
+					// 		}
+					// 	};
+					// });
+					// return null;
+				};
+			});
+
+			return reply.send({
+				transactions: transactions,
+				shadowlog: shadow
+			});
+		}
+		catch(err) {
+			return reply.send({
+				error:err
+			});
+		}
+
+
+		// await walletClient.open();
+		
+		// await walletClient.join("*");
+
+		// if (txIndex.status==="open") {
+		// 	const h = await wallet.getHistory("default");
+		// 	const w = await wallet.getInfo();
+		// 	return reply.send({
+		// 		wallet: w,
+		// 		history: h,
+		// 	});
+		// }
+		// else {
+		// 	return reply.send({
+		// 		status: txIndex.status
+		// 	});
+		// };
+	});
+
+
 	done();
 };
