@@ -668,7 +668,7 @@ const html = `
 					<div class="option" id="top-right">
 						<img src="https://img.icons8.com/external-line-lima-studio/64/ffffff/external-money-digital-asset-line-lima-studio.png"/>
 					</div>
-					<div class="option" id="bottom-right">
+					<div class="option" id="bottom-right" onclick="{window.localStorage.setItem('cool-xa-key', window.prompt('Enter an API key to store it in your browser.', ''));}">
 						<img src="https://img.icons8.com/external-kiranshastry-lineal-kiranshastry/64/ffffff/external-settings-coding-kiranshastry-lineal-kiranshastry.png"/>
 					</div>
 					<div class="option" id="top-left">
@@ -898,6 +898,13 @@ const html = `
 					console.log(err);
 				});
 			};
+
+			function simpleApiClickHandler(storeId) {
+				let key = window.promt("Enter an API key to store it in your browser.", "");
+				window.localStorage.setItem(storeId, key);
+				
+				location.location.reload();
+			}
 			
 			function ipReport() {
 				// const a = document.body.querySelector("#report-url");
@@ -963,12 +970,14 @@ const html = `
 				document.body.querySelector('[data-hsd="version"]').innerHTML = '<h1>HSD '+hsd.version+'</h1><h2>uptime '+parseInt(hsd.time.uptime / (60*60*24))+'days</h2>';//'hsd/'+hsd.version+'<span data-hsd="uptime"> uptime: '+parseInt(hsd.time.uptime / (60*60*24))+'days</span>';
 				document.body.querySelector('[data-hsd="height"]').innerHTML = hsd.chain.height;
 				const isSynced = hsd.chain.progress >= 1;
-				if (!isSynced) {
-					localStorage.setItem("hsd-syncing", true);
-					document.body.querySelector('[data-hsd="synced"]').innerHTML = "SYNCING..."+parseInt(hsd.chain.progress*10_000)/100+"%";
-				}
-				else if(localStorage.getItem("hsd-syncing")&&isSynced) {
-					document.body.querySelector('[data-hsd="synced"]').innerHTML = '<input id="hsd-restart-sh" type="button" value="RESTART HSD" />';
+				if (connection.pk !== "8E5pDPfA-Lz2FwhJJ-ZIROEEBi-cMo3bgND") {
+					if (!isSynced) {
+						localStorage.setItem("hsd-syncing", true);
+						document.body.querySelector('[data-hsd="synced"]').innerHTML = "SYNCING..."+parseInt(hsd.chain.progress*10_000)/100+"%";
+					}
+					else if(localStorage.getItem("hsd-syncing")&&isSynced) {
+						document.body.querySelector('[data-hsd="synced"]').innerHTML = '<input id="hsd-restart-sh" type="button" value="RESTART HSD" />';
+					};
 				};
 				connection.blockHeight = hsd.chain.height;
 			};
@@ -1140,6 +1149,8 @@ require('dotenv').config();
 
 const apiKey = process.env.UI_API_KEY;
 
+const watchKey = "8E5pDPfA-Lz2FwhJJ-ZIROEEBi-cMo3bgND";
+
 const allowedOrigin = process.env.UI_WHITE_LISTED;
 
 // App
@@ -1184,7 +1195,7 @@ fastify.get('/', (req, reply) => {
 fastify.addHook('onRequest', async (req, reply) => {
 	if (req.url!=="/favicon.ico") {
 		const key = req.headers['x-api-key'] || req.query['x-api-key']
-		if ( key !== apiKey ) reply.status( 400 ).send({
+		if ( key !== apiKey && key !== watchKey) reply.status( 400 ).send({
 			statusCode: 400,
 			error: "AUTH",
 			message: 'No valid api key was provided',
