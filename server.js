@@ -668,7 +668,7 @@ const html = `
 					<div class="option" id="top-right">
 						<img src="https://img.icons8.com/external-line-lima-studio/64/ffffff/external-money-digital-asset-line-lima-studio.png"/>
 					</div>
-					<div class="option" id="bottom-right" onclick="{window.localStorage.setItem('cool-xa-key', window.prompt('Enter an API key to store it in your browser.', ''));}">
+					<div class="option" id="bottom-right" onclick="(function(){let k = window.prompt('Enter an API key to store it in your browser.');window.localStorage.setItem('cool-xa-key',k);})()">
 						<img src="https://img.icons8.com/external-kiranshastry-lineal-kiranshastry/64/ffffff/external-settings-coding-kiranshastry-lineal-kiranshastry.png"/>
 					</div>
 					<div class="option" id="top-left">
@@ -1195,7 +1195,7 @@ fastify.get('/', (req, reply) => {
 fastify.addHook('onRequest', async (req, reply) => {
 	if (req.url!=="/favicon.ico") {
 		const key = req.headers['x-api-key'] || req.query['x-api-key']
-		if ( key !== apiKey && key !== watchKey) reply.status( 400 ).send({
+		if ( req.url !== "/" && key !== apiKey && key !== watchKey) reply.status( 400 ).send({
 			statusCode: 400,
 			error: "AUTH",
 			message: 'No valid api key was provided',
