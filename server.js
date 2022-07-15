@@ -903,7 +903,7 @@ const html = `
 				let key = window.promt("Enter an API key to store it in your browser.", "");
 				window.localStorage.setItem(storeId, key);
 				
-				location.location.reload();
+				location.reload();
 			}
 			
 			function ipReport() {
