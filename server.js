@@ -744,11 +744,14 @@ const html = `
 			const cache = {};
 			
 			const html = {};
+
+			let locations = [];
 			
 			let logLevel = 'info';
-			let cluster = [];
-			let locations = [];
+			let reduceMemory = true;
 
+			let prevNode, cluster = [];
+			
 			html.hsd = document.body.querySelector("#hsd");
 			html.nextblock = { 
 				front: document.body.querySelector("#frontside"), 
