@@ -769,7 +769,7 @@ const html = `
 				return arr.reduce((a, b) => a + b, 0) / arr.length;
 			}
 			
-function addConnected(id,target,pos) {
+			function addConnected(id,target,pos) {
 				locations.push(pos);
 				const peer = document.createElement("div");
 				peer.setAttribute("data-peer", id);
@@ -1029,24 +1029,6 @@ function addConnected(id,target,pos) {
 				.catch(err => {
 					console.log(err);
 				});
-			}
-
-			function getPeerinfo() {
-				fetch("/info/peers",{
-					method: "GET",
-					headers: {
-						"Content-Type" : "application/json",
-						"x-api-key": connection.pk
-					}
-				})
-				.then(res => res.json())
-				.then(peers => {
-					handlePeerinfo(peers);
-				})
-				.catch(err => {
-					console.log(err);
-				});
-
 			};
 
 			function getPeerinfo(k) {
