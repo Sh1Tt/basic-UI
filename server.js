@@ -1041,49 +1041,52 @@ const html = `
 				})
 				.then(res => res.json())
 				.then(peers => {
-					connection.peers.new = peers.map(p => p.id).filter(n => !connection.peers.connected.includes(n));
-					connection.peers.disconnected = connection.peers.connected.filter(n => !peers.map(p => p.id).includes(n));
-					connection.peers.connected = peers.map(p => p.id);
-					connection.peers.count = peers.length;
-					connection.peers.leafs = peers.filter(p => /hnsd/.test(p.subver)).map(p => p.id);
-					connection.peers.inbound = peers.filter(p => p.inbound).length;
-					connection.peers.pingtime = peers.filter(p => p.pingtime > 0).map(p => p.pingtime);
-					
-					document.body.querySelector('[data-hsd="peers"]').innerHTML = connection.peers.count;
-					document.body.querySelector('[data-hsd="inbound"]').innerHTML = connection.peers.inbound;
-					document.body.querySelector('[data-hsd="avgping"]').innerHTML = parseInt(avg(connection.peers.pingtime)*100)/100+'ms';
-
-					connection.peers.disconnected.forEach((id,index) => {
-						const peer = document.querySelector('[data-peer="'+id+'"]');
-						peer.classList.remove('connected');
-						const conn = document.querySelector('[data-connection="'+id+'"]');
-						setTimeout(() => {
-							hsd.removeChild(peer);
-							hsd.removeChild(conn);
-						}, 2500);
-					});
-
-					connection.peers.new.forEach((id,index) => {
-						const start = coord(25);
-						cluster.push(start)
-						addConnected(id,html.hsd,start);
-					});
-
-					peers.forEach(peer => {
-						const x = document.querySelector('[data-peer="'+peer.id+'"]') || null;
-						if (x) {
-							x.innerHTML = "";
-							peerInfo(peer, x);
-						};
-					});
-
+					handlePeerInfo(peers);
 				})
 				.catch(err => {
 					console.log(err);
 				});
 
 			};
+			
+			function handlePeerInfo(peers) {
+				connection.peers.new = peers.map(p => p.id).filter(n => !connection.peers.connected.includes(n));
+				connection.peers.disconnected = connection.peers.connected.filter(n => !peers.map(p => p.id).includes(n));
+				connection.peers.connected = peers.map(p => p.id);
+				connection.peers.count = peers.length;
+				connection.peers.leafs = peers.filter(p => /hnsd/.test(p.subver)).map(p => p.id);
+				connection.peers.inbound = peers.filter(p => p.inbound).length;
+				connection.peers.pingtime = peers.filter(p => p.pingtime > 0).map(p => p.pingtime);
 
+				document.body.querySelector('[data-hsd="peers"]').innerHTML = connection.peers.count;
+				document.body.querySelector('[data-hsd="inbound"]').innerHTML = connection.peers.inbound;
+				document.body.querySelector('[data-hsd="avgping"]').innerHTML = parseInt(avg(connection.peers.pingtime)*100)/100+'ms';
+
+				connection.peers.disconnected.forEach((id,index) => {
+					const peer = document.querySelector('[data-peer="'+id+'"]');
+					peer.classList.remove('connected');
+					const conn = document.querySelector('[data-connection="'+id+'"]');
+					setTimeout(() => {
+						hsd.removeChild(peer);
+						hsd.removeChild(conn);
+					}, 2500);
+				});
+
+				connection.peers.new.forEach((id,index) => {
+					const start = coord(25);
+					cluster.push(start)
+					addConnected(id,html.hsd,start);
+				});
+
+				peers.forEach(peer => {
+					const x = document.querySelector('[data-peer="'+peer.id+'"]') || null;
+					if (x) {
+						x.innerHTML = "";
+						peerInfo(peer, x);
+					};
+				});
+			};
+			
 			function getMempoolTx() {
 				fetch("/mempool/tx/hashes",{
 					method: "GET",
