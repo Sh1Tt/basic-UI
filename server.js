@@ -1041,7 +1041,7 @@ const html = `
 				})
 				.then(res => res.json())
 				.then(peers => {
-					handlePeerInfo(peers);
+					handlePeerinfo(peers);
 				})
 				.catch(err => {
 					console.log(err);
@@ -1049,7 +1049,7 @@ const html = `
 
 			};
 			
-			function handlePeerInfo(peers) {
+			function handlePeerinfo(peers) {
 				connection.peers.new = peers.map(p => p.id).filter(n => !connection.peers.connected.includes(n));
 				connection.peers.disconnected = connection.peers.connected.filter(n => !peers.map(p => p.id).includes(n));
 				connection.peers.connected = peers.map(p => p.id);
