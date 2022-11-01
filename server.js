@@ -745,7 +745,8 @@ const html = `
 			
 			const html = {};
 			
-			let logLevel = 'info';
+			let logLevel, lowPerformace, cluster;
+			loglevel = 'info';
 
 			html.hsd = document.body.querySelector("#hsd");
 			html.nextblock = { 
