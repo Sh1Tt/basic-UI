@@ -758,16 +758,19 @@ const html = `
 				left: document.body.querySelector("#leftside")
 			};
 
+			function iRnd(min = 0, max = 9) {
+				return parseInt(Math.floor((Math.random() + 0) * (max)) + min);
+			};
+
 			function coord(min) {
-				function Rnd(max) {
-					return Math.floor((Math.random() + 0 ) * (max - 120)); 
+				const padding = 120;
+				const pos = (_min, _max, _padding) => iRnd(_min, (_max - (_padding * 2)));
+				const x = pos(min, window.innerWidth, padding);
+				const y = pos(min, window.innerHeight, padding);
+				return { 
+					x: x, 
+					y: y 
 				};
-
-				const x = Rnd(window.innerWidth);
-				const y = Rnd(window.innerHeight);
-
-				return ( x >= min && y >= min ? coord() : { x: x, y: y } ); 
-
 			};
 
 			function avg(arr) {
