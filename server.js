@@ -769,7 +769,8 @@ const html = `
 				return arr.reduce((a, b) => a + b, 0) / arr.length;
 			}
 			
-			function addConnected(id,target,pos) {
+function addConnected(id,target,pos) {
+				locations.push(pos);
 				const peer = document.createElement("div");
 				peer.setAttribute("data-peer", id);
 				peer.classList = "peer connected";
@@ -780,11 +781,42 @@ const html = `
 				const conn = document.createElement("span");
 				conn.setAttribute("data-connection", id);
 				conn.classList = "peer connection";
-				conn.style.animationDuration = ((id * 100) / 25)+'s';
-				conn.style.clipPath = "polygon(30% 45%, 30.1% 45.1%, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				const isNode = !connection.peers.leafs.includes(id);
+				if (!isNode) {
+					conn.style.clipPath = "polygon("+(prevNode.x+2)+"px "+(prevNode.y+2)+"px, "+(prevNode.x+3)+"px "+(prevNode.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+					target.appendChild(peer)
+					target.appendChild(conn);
+					return;
+				};
+
+				prevNode = pos;
+				const hsdCount = connection.peers.count - connection.peers.leafs.length;
+				const clusterSize = 9;
+				if (cluster.length < clusterSize) {
+					cluster = [ ...cluster, pos ];
+				}
+				else {
+					cluster = [ pos ];
+				};
+
+				const prevPos = iRnd() > 2 ? locations.length < 3 ? 0 : locations[locations.length - (iRnd() > 4 ? 2 : 3)] : locations[iRnd(0,locations.length - 1)];
 				
+				if (prevPos !== 0 && iRnd() > 1) {
+					conn.style.clipPath = "polygon("+(prevPos.x+2)+"px "+(prevPos.y+2)+"px, "+(prevPos.x+3)+"px "+(prevPos.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				}
+				else {
+					conn.style.clipPath = "polygon(30% 45%, 30.1% 45.1%, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				};
+
 				target.appendChild(peer)
 				target.appendChild(conn);
+				cluster.forEach((cc,i) => {
+					const clusterConn = document.createElement("span");
+					clusterConn.setAttribute("data-connection", id);
+					clusterConn.classList = "peer connection";
+					clusterConn.style.clipPath = "polygon("+(cc.x+2)+"px "+(cc.y+2)+"px, "+(cc.x+3)+"px "+(cc.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+					target.appendChild(clusterConn);
+				});
 			};
 			function removeConnected(id) {
 				const peer = document.querySelector('[data-peer="'+id+'"]');
@@ -1017,37 +1049,57 @@ const html = `
 
 			};
 
-			function handlePeerinfo(peers) {
-				connection.peers.new = peers.map(p => p.id).filter(n => !connection.peers.connected.includes(n));
-				connection.peers.disconnected = connection.peers.connected.filter(n => !peers.map(p => p.id).includes(n));
-				connection.peers.connected = peers.map(p => p.id);
-				connection.peers.count = peers.length;
-				connection.peers.inbound = peers.filter(p => p.inbound).length;
-				connection.peers.pingtime = peers.filter(p => p.pingtime > 0).map(p => p.pingtime);
-				
-				document.body.querySelector('[data-hsd="peers"]').innerHTML = connection.peers.count;
-				document.body.querySelector('[data-hsd="inbound"]').innerHTML = connection.peers.inbound;
-				document.body.querySelector('[data-hsd="avgping"]').innerHTML = parseInt(avg(connection.peers.pingtime)*100)/100+'ms';
+			function getPeerinfo(k) {
+				fetch("/hsd/peerinfo",{
+					method: "GET",
+					headers: {
+						"Content-Type" : "application/json",
+						"x-api-key": k
+					}
+				})
+				.then(res => res.json())
+				.then(peers => {
+					connection.peers.new = peers.map(p => p.id).filter(n => !connection.peers.connected.includes(n));
+					connection.peers.disconnected = connection.peers.connected.filter(n => !peers.map(p => p.id).includes(n));
+					connection.peers.connected = peers.map(p => p.id);
+					connection.peers.count = peers.length;
+					connection.peers.leafs = peers.filter(p => /hnsd/.test(p.subver)).map(p => p.id);
+					connection.peers.inbound = peers.filter(p => p.inbound).length;
+					connection.peers.pingtime = peers.filter(p => p.pingtime > 0).map(p => p.pingtime);
+					
+					document.body.querySelector('[data-hsd="peers"]').innerHTML = connection.peers.count;
+					document.body.querySelector('[data-hsd="inbound"]').innerHTML = connection.peers.inbound;
+					document.body.querySelector('[data-hsd="avgping"]').innerHTML = parseInt(avg(connection.peers.pingtime)*100)/100+'ms';
 
-				connection.peers.disconnected.forEach((id,index) => {
-					const peer = document.querySelector('[data-peer="'+id+'"]');
-					peer.classList.remove('connected');
-					const conn = document.querySelector('[data-connection="'+id+'"]');
-					setTimeout(() => {
-						hsd.removeChild(peer);
-						hsd.removeChild(conn);
-					}, 2500);
+					connection.peers.disconnected.forEach((id,index) => {
+						const peer = document.querySelector('[data-peer="'+id+'"]');
+						peer.classList.remove('connected');
+						const conn = document.querySelector('[data-connection="'+id+'"]');
+						setTimeout(() => {
+							hsd.removeChild(peer);
+							hsd.removeChild(conn);
+						}, 2500);
+					});
+
+					connection.peers.new.forEach((id,index) => {
+						const start = coord(25);
+						cluster.push(start)
+						addConnected(id,html.hsd,start);
+					});
+
+					peers.forEach(peer => {
+						const x = document.querySelector('[data-peer="'+peer.id+'"]') || null;
+						if (x) {
+							x.innerHTML = "";
+							peerInfo(peer, x);
+						};
+					});
+
+				})
+				.catch(err => {
+					console.log(err);
 				});
 
-				connection.peers.new.forEach((id,index) => {
-					addConnected(id,html.hsd,coord(125));
-				});
-
-				peers.forEach(peer => {
-					const x = document.querySelector('[data-peer="'+peer.id+'"]');
-					x.innerHTML = "";
-					peerInfo(peer, x);
-				});
 			};
 
 			function getMempoolTx() {
