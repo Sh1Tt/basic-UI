@@ -770,6 +770,7 @@ const html = `
 			}
 			
 			function addConnected(id,target,pos) {
+				locations.push(pos);
 				const peer = document.createElement("div");
 				peer.setAttribute("data-peer", id);
 				peer.classList = "peer connected";
@@ -780,11 +781,42 @@ const html = `
 				const conn = document.createElement("span");
 				conn.setAttribute("data-connection", id);
 				conn.classList = "peer connection";
-				conn.style.animationDuration = ((id * 100) / 25)+'s';
-				conn.style.clipPath = "polygon(30% 45%, 30.1% 45.1%, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				const isNode = !connection.peers.leafs.includes(id);
+				if (!isNode) {
+					conn.style.clipPath = "polygon("+(prevNode.x+2)+"px "+(prevNode.y+2)+"px, "+(prevNode.x+3)+"px "+(prevNode.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+					target.appendChild(peer)
+					target.appendChild(conn);
+					return;
+				};
+
+				prevNode = pos;
+				const hsdCount = connection.peers.count - connection.peers.leafs.length;
+				const clusterSize = 9;
+				if (cluster.length < clusterSize) {
+					cluster = [ ...cluster, pos ];
+				}
+				else {
+					cluster = [ pos ];
+				};
+
+				const prevPos = iRnd() > 2 ? locations.length < 3 ? 0 : locations[locations.length - (iRnd() > 4 ? 2 : 3)] : locations[iRnd(0,locations.length - 1)];
 				
+				if (prevPos !== 0 && iRnd() > 1) {
+					conn.style.clipPath = "polygon("+(prevPos.x+2)+"px "+(prevPos.y+2)+"px, "+(prevPos.x+3)+"px "+(prevPos.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				}
+				else {
+					conn.style.clipPath = "polygon(30% 45%, 30.1% 45.1%, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+				};
+
 				target.appendChild(peer)
 				target.appendChild(conn);
+				cluster.forEach((cc,i) => {
+					const clusterConn = document.createElement("span");
+					clusterConn.setAttribute("data-connection", id);
+					clusterConn.classList = "peer connection";
+					clusterConn.style.clipPath = "polygon("+(cc.x+2)+"px "+(cc.y+2)+"px, "+(cc.x+3)+"px "+(cc.y+3)+"px, "+(pos.x+2)+"px "+(pos.y+2)+"px, "+(pos.x+3)+"px "+(pos.y+3)+"px)";
+					target.appendChild(clusterConn);
+				});
 			};
 			function removeConnected(id) {
 				const peer = document.querySelector('[data-peer="'+id+'"]');
