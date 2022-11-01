@@ -747,6 +747,7 @@ const html = `
 			
 			let logLevel = 'info';
 			let cluster = [];
+			let locations = [];
 
 			html.hsd = document.body.querySelector("#hsd");
 			html.nextblock = { 
