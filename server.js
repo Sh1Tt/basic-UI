@@ -1212,21 +1212,20 @@ const fastify = require("fastify")({
 
 // Plugins
 
-fastify.register(require('fastify-favicon'));
+fastify.register(
+	require('fastify-favicon')
+);
 
-// fastify.register(require("fastify-cors"), {
-// 	origin: "*",
-// 	methods: ["GET"]
-// });
-
-// fastify.register(require("fastify-compress"), {
-// 	global: true,
-// 	removeContentLengthHeader: false
-// });
+fastify.register(
+  require('@fastify/compress'),
+  { global: false }
+);
 
 // Routes
 
-fastify.register(require("./routes/v1"));
+fastify.register(
+	require("./routes/v1")
+);
 
 // App
 
